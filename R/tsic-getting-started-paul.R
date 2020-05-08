@@ -1,5 +1,5 @@
 # This loads and sources all necessary background stuff:
-source( "~/src/from-git/tsic/R/tsic-getting-started-fromsource.R" )
+source( "tsic-getting-started-fromsource.R" )
 
 ##############
 ## Params
