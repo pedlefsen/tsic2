@@ -1,8 +1,24 @@
+## To ensure you don't accidentally keep stuff in memory and get buggy output if there's an unnoticed Error, do this first:
+rm( list = ls() )
+
 # This loads and sources all necessary background stuff:
 source( "tsic-getting-started-fromsource.R" )
 
 ##############
 ## Params
+## Choose one scenario among names( scenarios ) [see below]
+scenario <- "ComboRNA";
+# Make the RNA negative date X.1.days.apart days before the positive date:
+X.1.days.apart <- 7;
+# Make the other one negative date X.2 days before the positive date:
+X.2.days.apart <- 28;
+# Shift them so the RNA dates are Y days earlier.
+Y.days.earlier <- 0;
+
+#### Usually don't need to change these:
+# Align them so the RNA + date is on the Combo - date, keeping diagnostic uncertainty window lengths.
+align.diagnosis.dates <- TRUE;
+# Make the scales for the aggregate curves free, rather than forced to go to 1 - especially helpful for posterior density plotting.
 scales <- "free_y"; # Note this is a change from what Phillip had shown.
 ##############
 
@@ -28,29 +44,45 @@ scales <- "free_y"; # Note this is a change from what Phillip had shown.
 # )
 # ihist$sample_date <- ihist$sample_date + 0.5
 
-ihist <- ihist.RNAonly.oneday1;
-output.filename.base <- "RNA";
-#ihist <- ihist.RNAonly.31days;
-#ihist <- ihist.Comboonly.oneday6;
-#ihist <- ihist.Comboonly.31days;
-#ihist <- ihist.Abonly.oneday21;
-# ihist <- ihist.ComboRNA.oneday6.oneday1;
-# output.filename.base <- "ComboRNA";
+#### Choose one scenario:
+scenarios <-
+    list(
+         "RNA" = list(
+                      biomarker.with.fastest.result = "RNA",
+                      ihist = ihist.RNAonly.oneday1,
+                      output.filename.base = "RNA" ),
+         "Combo" = list(
+                      biomarker.with.fastest.result = "Combo",
+                      ihist = ihist.Comboonly.oneday6,
+                      output.filename.base = "Combo" ),
+         "Ab" = list(
+                      biomarker.with.fastest.result = "Ab",
+                      ihist = ihist.Abonly.oneday21,
+                      output.filename.base = "Ab" ),
+         "ComboRNA" = list(
+                      biomarker.with.fastest.result = "RNA",
+                      ihist = ihist.ComboRNA.oneday6.oneday1,
+                      output.filename.base = "ComboRNA" )
+         );
 
-## Make the RNA negative date X.RNA days before the positive date:
-X.RNA.days.apart <- 7;
-output.filename.base <- paste( output.filename.base, X.RNA.days.apart, "daysRNA", sep = "" );
-ihist$sample_date[ 1 ] <- ( ihist$sample_date[ 2 ] - X.RNA.days.apart );
+stopifnot( scenario %in% names( scenarios ) );
+
+## Add this scenario to the environment.
+cat( paste( "Using scenario", scenario ), fill = TRUE );
+attach( scenarios[[ scenario ]], name = scenario );
+
+## Make the RNA negative date X.1.days.apart days before the positive date:
+output.filename.base <- paste( output.filename.base, X.1.days.apart, paste( "days", biomarker.with.fastest.result, sep = "" ), sep = "" );
+ihist$sample_date[ 1 ] <- ( ihist$sample_date[ 2 ] - X.1.days.apart );
 
 ## Make the other one negative date X.2 days before the positive date:
-X.2.days.apart <- 28;
-if( nrow( ihist ) > 2 ) {p
+if( nrow( ihist ) > 2 ) {
     ihist$sample_date[ 3 ] <- ( ihist$sample_date[ 4 ] - X.2.days.apart );
     output.filename.base <- paste( output.filename.base, X.2.days.apart, "daysCombo", sep = "" );
 }
 
 ## Align them so the RNA + date is on the Combo - date, keeping diagnostic uncertainty window lengths.
-if( nrow( ihist ) > 2 ) {
+if( align.diagnosis.dates && ( nrow( ihist ) > 2 ) ) {
      days.to.shift.by.to.align.times.across.tests <-
          ( ihist$sample_date[ 2 ] - ihist$sample_date[ 3 ] );
     ihist$sample_date[ 1:2 ] <-
@@ -58,7 +90,6 @@ if( nrow( ihist ) > 2 ) {
      #output.filename.base <- paste( output.filename.base, "RNAPosAtComboNeg", sep = "" );
 }
 ## Shift them so the RNA dates are Y days earlier.
-Y.days.earlier <- 0;
 if( ( Y.days.earlier != 0 ) && ( nrow( ihist ) > 2 ) ) {
     ihist$sample_date[ 1:2 ] <-
         ihist$sample_date[ 1:2 ] - Y.days.earlier;
@@ -223,6 +254,8 @@ if( !is.null( ihist.prior ) ) {
           ggplot2::guides(color = FALSE)
 } # End if !is.null( ihist.prior )
 
+cat( paste( "Writing output to files beginning with", output.filename.base ), fill = TRUE );
+
 write.csv( apply( results.table, 1:2, function( x ) { sprintf( "%0.2f", x ) } ), file = paste( output.filename.base, ".csv", sep = "" ) )
 
 pdf( paste( output.filename.base, "_CDFs.pdf", sep = "" ) );
@@ -238,3 +271,6 @@ if( !is.null( ihist.prior ) ) {
     print(the_plot.prior)
     dev.off()
 }
+
+## Remove this scenario from the environment.
+detach( scenario, character.only = TRUE );
