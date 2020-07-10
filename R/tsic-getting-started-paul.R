@@ -7,13 +7,24 @@ source( "tsic-getting-started-fromsource.R" )
 ##############
 ## Params
 ## Choose one scenario among names( scenarios ) [see below]
-scenario <- "ComboRNA";
-# Make the RNA negative date X.1.days.apart days before the positive date:
+#scenario <- "RNA";
+#scenario <- "Combo";
+#scenario <- "ComboRNA";
+#scenario <- "Ab";
+#scenario <- "AbRNA";
+scenario <- "AbCombo";
+#scenario <- "AbComboRNA";
+# Make the RNA negative date X.1.days.apart days before the corresponding positive date:
+#X.1.days.apart <- 28;
 X.1.days.apart <- 7;
-# Make the other one negative date X.2 days before the positive date:
-X.2.days.apart <- 28;
+# Make the other one negative date X.2 days before the corresponding positive date:
+X.2.days.apart <- 7;
+# Make the third negative date X.3 days before the corresponding positive date:
+X.3.days.apart <- 7;
 # Shift them so the RNA dates are Y days earlier.
-Y.days.earlier <- 0;
+Y.1.days.earlier <- 0;
+Y.2.days.earlier <- 0;
+
 
 #### Usually don't need to change these:
 # Align them so the RNA + date is on the Combo - date, keeping diagnostic uncertainty window lengths.
@@ -24,45 +35,100 @@ scales <- "free_y"; # Note this is a change from what Phillip had shown.
 
 ##############
 ## Data
-## This is the default ihist shown in isic-getting-started.Rmd. See below where we also can use pre-defined ihists.
-# ihist <- data.frame(
-#   ptid = c('p0', 'p0'),
-#   sample_date = c(as.numeric(as.Date('2019-04-01')), as.numeric(as.Date('2019-05-01'))),
-#   test = c('architect_weib3_delaney', 'architect_weib3_delaney'),
-#   result = c('-', '+'),
-#   stringsAsFactors = FALSE
-# )
-# ihist$sample_date <- ihist$sample_date + 0.5
 
-# This is exactly the same as ihist.Comboonly.oneday6
-# ihist <- data.frame(
-#   ptid = c('p0', 'p0'),
-#   sample_date = c(as.numeric( as.Date( '2019-04-20' ) ), as.numeric( as.Date( '2019-04-21' ) )),
-#   test = c('architect_weib3_delaney', 'architect_weib3_delaney'),
-#   result = c('-', '+'),
-#   stringsAsFactors = FALSE
-# )
-# ihist$sample_date <- ihist$sample_date + 0.5
+# These have just RNA results.
+ihist.RNAonly.28days <- data.frame(
+  ptid = 'RNA-only',
+  sample_date = c(17980.5, 18008.5),
+  test = c('abbott_real_time_weib3_delaney_and_manufacturer', 'abbott_real_time_weib3_delaney_and_manufacturer' ),
+  result = c('-', '+'),
+  stringsAsFactors = FALSE )
+
+## These have just combo
+ihist.Comboonly.7days <- data.frame(
+  ptid = 'Combo-only',
+  sample_date = c(18008.5, 18015.5),
+  test = c('architect_weib3_delaney', 'architect_weib3_delaney' ),
+  result = c('-', '+'),
+  stringsAsFactors = FALSE )
+
+## These have combo and RNA
+ihist.ComboRNA.7days.28days <- data.frame(
+  ptid = 'Combo-RNA',
+  sample_date = c(17980.5, 18008.5, 18008.5, 18015.5),
+  test = c('abbott_real_time_weib3_delaney_and_manufacturer', 'abbott_real_time_weib3_delaney_and_manufacturer','architect_weib3_delaney', 'architect_weib3_delaney' ),
+  result = c('-', '+','-', '+'),
+  stringsAsFactors = FALSE )
+
+## These have just Ab
+ihist.Abonly.7days <- data.frame(
+  ptid = 'Ab-only',
+  sample_date = c(18015.5, 18022.5),
+  test = c('geenius_fr_weib3_delaney', 'geenius_fr_weib3_delaney' ),
+  result = c('-', '+'),
+  stringsAsFactors = FALSE )
+
+## These have Ab and RNA
+ihist.AbRNA.7days.28days <- data.frame(
+  ptid = 'Ab-RNA',
+  sample_date = c(17980.5, 18008.5, 18015.5, 18022.5),
+  test = c('abbott_real_time_weib3_delaney_and_manufacturer', 'abbott_real_time_weib3_delaney_and_manufacturer', 'geenius_fr_weib3_delaney', 'geenius_fr_weib3_delaney' ),
+  result = c('-', '+','-', '+'),
+  stringsAsFactors = FALSE )
+
+## These have Ab and Combo
+ihist.AbCombo.7days.7days <- data.frame(
+  ptid = 'Ab-Combo',
+  sample_date = c(18008.5, 18015.5, 18015.5, 18022.5),
+  test = c('architect_weib3_delaney', 'architect_weib3_delaney', 'geenius_fr_weib3_delaney', 'geenius_fr_weib3_delaney' ),
+  result = c('-', '+','-', '+'),
+  stringsAsFactors = FALSE )
+
+## These have Ab and Combo and RNA
+ihist.AbComboRNA.7days.7days.28days <- data.frame(
+  ptid = 'Ab-Combo-RNA',
+  sample_date = c(17980.5, 18008.5, 18008.5, 18015.5, 18015.5, 18022.5),
+  test = c('abbott_real_time_weib3_delaney_and_manufacturer', 'abbott_real_time_weib3_delaney_and_manufacturer','architect_weib3_delaney', 'architect_weib3_delaney', 'geenius_fr_weib3_delaney', 'geenius_fr_weib3_delaney' ),
+  result = c('-', '+','-', '+','-', '+'),
+  stringsAsFactors = FALSE )
+
 
 #### Choose one scenario:
 scenarios <-
     list(
          "RNA" = list(
-                      biomarker.with.fastest.result = "RNA",
-                      ihist = ihist.RNAonly.oneday1,
+                      biomarker.1 = "RNA",
+                      ihist = ihist.RNAonly.28days,
                       output.filename.base = "RNA" ),
          "Combo" = list(
-                      biomarker.with.fastest.result = "Combo",
-                      ihist = ihist.Comboonly.oneday6,
+                      biomarker.1 = "Combo",
+                      ihist = ihist.Comboonly.7days,
                       output.filename.base = "Combo" ),
          "Ab" = list(
-                      biomarker.with.fastest.result = "Ab",
-                      ihist = ihist.Abonly.oneday21,
+                      biomarker.1 = "Ab",
+                      ihist = ihist.Abonly.7days,
                       output.filename.base = "Ab" ),
          "ComboRNA" = list(
-                      biomarker.with.fastest.result = "RNA",
-                      ihist = ihist.ComboRNA.oneday6.oneday1,
-                      output.filename.base = "ComboRNA" )
+                      biomarker.1 = "RNA",
+                      biomarker.2 = "Combo",
+                      ihist = ihist.ComboRNA.7days.28days,
+                      output.filename.base = "ComboRNA" ),
+         "AbRNA" = list(
+                      biomarker.1 = "RNA",
+                      biomarker.2 = "Ab",
+                      ihist = ihist.AbRNA.7days.28days,
+                      output.filename.base = "AbRNA" ),
+         "AbCombo" = list(
+                      biomarker.1 = "Combo",
+                      biomarker.2 = "Ab",
+                      ihist = ihist.AbCombo.7days.7days,
+                      output.filename.base = "AbCombo" ),
+         "AbComboRNA" = list(
+                      biomarker.1 = "RNA",
+                      biomarker.2 = "Combo",
+                      biomarker.3 = "Ab",
+                      ihist = ihist.AbComboRNA.7days.7days.28days,
+                      output.filename.base = "AbComboRNA" )
          );
 
 stopifnot( scenario %in% names( scenarios ) );
@@ -72,17 +138,29 @@ cat( paste( "Using scenario", scenario ), fill = TRUE );
 attach( scenarios[[ scenario ]], name = scenario );
 
 ## Make the RNA negative date X.1.days.apart days before the positive date:
-output.filename.base <- paste( output.filename.base, X.1.days.apart, paste( "days", biomarker.with.fastest.result, sep = "" ), sep = "" );
+output.filename.base <- paste( output.filename.base, X.1.days.apart, paste( "days", biomarker.1, sep = "" ), sep = "" );
 ihist$sample_date[ 1 ] <- ( ihist$sample_date[ 2 ] - X.1.days.apart );
 
 ## Make the other one negative date X.2 days before the positive date:
 if( nrow( ihist ) > 2 ) {
     ihist$sample_date[ 3 ] <- ( ihist$sample_date[ 4 ] - X.2.days.apart );
-    output.filename.base <- paste( output.filename.base, X.2.days.apart, "daysCombo", sep = "" );
+    output.filename.base <- paste( output.filename.base, X.2.days.apart, paste( "days", biomarker.2, sep = "" ), sep = "" );
+}
+
+## Make the other one negative date X.3 days before the positive date:
+if( nrow( ihist ) > 4 ) {
+    ihist$sample_date[ 5 ] <- ( ihist$sample_date[ 6 ] - X.3.days.apart );
+    output.filename.base <- paste( output.filename.base, X.3.days.apart, paste( "days", biomarker.3, sep = "" ), sep = "" );
 }
 
 ## Align them so the RNA + date is on the Combo - date, keeping diagnostic uncertainty window lengths.
 if( align.diagnosis.dates && ( nrow( ihist ) > 2 ) ) {
+     if( nrow( ihist ) > 4 ) {
+         days.to.shift.by.to.align.times.across.tests <-
+             ( ihist$sample_date[ 4 ] - ihist$sample_date[ 5 ] );
+         ihist$sample_date[ 3:4 ] <-
+            ihist$sample_date[ 3:4 ] - days.to.shift.by.to.align.times.across.tests;
+     }
      days.to.shift.by.to.align.times.across.tests <-
          ( ihist$sample_date[ 2 ] - ihist$sample_date[ 3 ] );
     ihist$sample_date[ 1:2 ] <-
@@ -90,10 +168,15 @@ if( align.diagnosis.dates && ( nrow( ihist ) > 2 ) ) {
      #output.filename.base <- paste( output.filename.base, "RNAPosAtComboNeg", sep = "" );
 }
 ## Shift them so the RNA dates are Y days earlier.
-if( ( Y.days.earlier != 0 ) && ( nrow( ihist ) > 2 ) ) {
+if( ( Y.1.days.earlier != 0 ) && ( nrow( ihist ) > 2 ) ) {
     ihist$sample_date[ 1:2 ] <-
-        ihist$sample_date[ 1:2 ] - Y.days.earlier;
-    output.filename.base <- paste( output.filename.base, "RNAshifted", Y.days.earlier, "days", sep = "" );
+        ihist$sample_date[ 1:2 ] - Y.1.days.earlier;
+    output.filename.base <- paste( output.filename.base, paste( biomarker.1, "shifted", sep = "" ), Y.1.days.earlier, "days", sep = "" );
+}
+if( ( Y.2.days.earlier != 0 ) && ( nrow( ihist ) > 4 ) ) {
+    ihist$sample_date[ 3:4 ] <-
+        ihist$sample_date[ 3:4 ] - Y.2.days.earlier;
+    output.filename.base <- paste( output.filename.base, paste( biomarker.2, "shifted", sep = "" ), Y.2.days.earlier, "days", sep = "" );
 }
 
 ##############
@@ -169,14 +252,14 @@ results.table <- cbind( results.table, "IntegratedPDFs_PriorPDF" = unlist( lb_me
 ## Results: plot
 the_plot.old <- 
 plot_iihist(ihist = ihist, lb_med_ub = lb_med_ub.old, 
-            range_start = as.numeric(as.Date('2019-02-01')),
-            range_end = as.numeric(as.Date('2019-05-01')), 
+            range_start = as.numeric(as.Date('2019-02-15')),
+            range_end = as.numeric(as.Date('2019-05-07')), 
             plot_aggregate = TRUE,
             produce_plot = FALSE,
             scales = scales,
             show_test_dates = 0.5,
                 x_breaks =
-                  seq( as.numeric(as.Date('2019-02-01')), as.numeric(as.Date('2019-05-01')), by = 2 ),
+                  seq( as.numeric(as.Date('2019-02-15')), as.numeric(as.Date('2019-05-07')), by = 2 ),
             aggregate_interpreter = agg_interpreter.old
             )
 the_plot.old <- the_plot.old + 
@@ -186,14 +269,14 @@ the_plot.old <- the_plot.old +
 
 the_plot.new <- 
 plot_iihist(ihist = ihist, lb_med_ub = lb_med_ub.new, 
-            range_start = as.numeric(as.Date('2019-02-01')),
-            range_end = as.numeric(as.Date('2019-05-01')), 
+            range_start = as.numeric(as.Date('2019-02-15')),
+            range_end = as.numeric(as.Date('2019-05-07')), 
             plot_aggregate = TRUE,
             produce_plot = FALSE,
             scales = scales,
             show_test_dates = 0.5,
                 x_breaks =
-                  seq( as.numeric(as.Date('2019-02-01')), as.numeric(as.Date('2019-05-01')), by = 2 ),
+                  seq( as.numeric(as.Date('2019-02-15')), as.numeric(as.Date('2019-05-07')), by = 2 ),
             aggregate_interpreter = agg_interpreter.new
             )
 the_plot.new <- the_plot.new + 
@@ -204,8 +287,9 @@ the_plot.new <- the_plot.new +
 ######
 ## Prior plot
 agg_interpreter.prior <- prior.over.rna.threshold.crossing.time;
-ihist.RNA.tests <-
-    agg_interpreter.new.in.list.with.inputs[[ "remaining.biomarker.bounds.to.process.last.to.first" ]][[ "RNA" ]]$test;
+test.classes <- sapply( ihist$test, function( test.name ) { all_assay_dynamics[[test.name]]$class } )
+ihist.RNA.tests <- unique( ihist$test[ test.classes == "RNA" ] );
+
 ihist.prior <-
     ihist[ !( ihist$test %in% ihist.RNA.tests ), , drop = FALSE ];
 if( nrow( ihist.prior ) == 0 ) {
@@ -236,15 +320,15 @@ if( !is.null( ihist.prior ) ) {
         
     the_plot.prior <- 
         plot_iihist(ihist = ihist.prior, lb_med_ub = lb_med_ub.prior,
-                range_start = as.numeric(as.Date('2019-02-01')),
-                range_end = as.numeric(as.Date('2019-05-01')), 
+                range_start = as.numeric(as.Date('2019-02-15')),
+                range_end = as.numeric(as.Date('2019-05-07')), 
                 plot_aggregate = TRUE,
                 custom_aggregate_label = "Posterior distribution of\nRNA\nthreshold-crossing time",
                 produce_plot = FALSE,
                 scales = scales,
                 show_test_dates = 0.5,
                     x_breaks =
-                      seq( as.numeric(as.Date('2019-02-01')), as.numeric(as.Date('2019-05-01')), by = 2 ),
+                      seq( as.numeric(as.Date('2019-02-15')), as.numeric(as.Date('2019-05-07')), by = 2 ),
                 assay_interpreters = assay_interpreters.prior,
                 aggregate_interpreter = agg_interpreter.prior
                 )

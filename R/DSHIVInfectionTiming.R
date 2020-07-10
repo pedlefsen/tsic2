@@ -603,6 +603,22 @@ ihist.Abonly.oneday21 <- data.frame(
   result = c('-', '+'),
   stringsAsFactors = FALSE )
 
+## These have Ab and RNA
+ihist.AbRNA.oneday21.oneday1 <- data.frame(
+  ptid = 'Ab-RNA',
+  sample_date = c(18000.5, 18001.5, 18021.5, 18022.5),
+  test = c('abbott_real_time_weib3_delaney_and_manufacturer', 'abbott_real_time_weib3_delaney_and_manufacturer', 'geenius_fr_weib3_delaney', 'geenius_fr_weib3_delaney' ),
+  result = c('-', '+','-', '+'),
+  stringsAsFactors = FALSE )
+
+## These have Ab and Combo and RNA
+ihist.AbComboRNA.oneday21.oneday6.oneday1 <- data.frame(
+  ptid = 'Ab-Combo-RNA',
+  sample_date = c(18000.5, 18001.5, 18006.5, 18007.5, 18021.5, 18022.5),
+  test = c('abbott_real_time_weib3_delaney_and_manufacturer', 'abbott_real_time_weib3_delaney_and_manufacturer','architect_weib3_delaney', 'architect_weib3_delaney', 'geenius_fr_weib3_delaney', 'geenius_fr_weib3_delaney' ),
+  result = c('-', '+','-', '+','-', '+'),
+  stringsAsFactors = FALSE )
+
 
 ####################################################################################################
 #### all_assay_dynamics is now provided by load( "~/src/from-git/tsic/data/all_assay_dynamics.rda" )
